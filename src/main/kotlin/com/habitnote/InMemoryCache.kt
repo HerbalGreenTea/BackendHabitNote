@@ -1,26 +1,12 @@
 package com.habitnote
 
 import com.habitnote.models.Habit
+import com.habitnote.models.HabitDone
 import com.habitnote.models.HabitUUID
 import java.util.*
 
 object InMemoryCache {
-    private val firstUUID = UUID.randomUUID().toString()
-
-    private val habit = Habit(
-        title = "HabitTitle",
-        description = "HabitDescription",
-        priority = 0,
-        type = 0,
-        frequency = 1,
-        count = 1,
-        color = -22272,
-        date = 1667075334008,
-        doneDates = listOf(),
-        uid = firstUUID,
-    )
-
-    private val habits = mutableMapOf<String, Habit>(firstUUID to habit)
+    private val habits = mutableMapOf<String, Habit>()
 
     fun getHabits(): List<Habit> = habits.values.toList()
 
@@ -33,6 +19,24 @@ object InMemoryCache {
         habits[habitUUID.uid] = habitWithUUID
 
         return habitUUID
+    }
+
+    fun doneHabit(habitDone: HabitDone): Boolean {
+        val habit = habits[habitDone.habit_uid]?.let { habit ->
+
+            val habitDoneDate = mutableListOf<Long>().apply {
+                addAll(habit.done_dates)
+                add(habitDone.date)
+            }
+
+            val doneHabit = habit.copy(
+                done_dates = habitDoneDate
+            )
+
+            habits[habitDone.habit_uid] = doneHabit
+        }
+
+        return habit != null
     }
 
     fun deleteHabit(habitUUID: HabitUUID) {

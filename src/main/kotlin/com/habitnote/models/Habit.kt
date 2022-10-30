@@ -12,6 +12,6 @@ data class Habit(
     val count: Int,
     val color: Int,
     val date: Long,
-    val doneDates: List<Long> = listOf(),
+    val done_dates: List<Long> = listOf(),
     val uid: String = "",
 )

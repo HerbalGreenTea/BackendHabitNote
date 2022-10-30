@@ -39,4 +39,8 @@ object InMemoryCache {
         val uuid = UUID.randomUUID().toString()
         return HabitUUID(uuid)
     }
+
+    fun isContainsHabit(habit: Habit): Boolean {
+        return habits.containsKey(habit.uid)
+    }
 }

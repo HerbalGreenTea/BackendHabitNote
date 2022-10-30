@@ -35,6 +35,10 @@ object InMemoryCache {
         return habitUUID
     }
 
+    fun deleteHabit(habitUUID: HabitUUID) {
+        habits.remove(habitUUID.uid)
+    }
+
     private fun getHabitUUID(): HabitUUID {
         val uuid = UUID.randomUUID().toString()
         return HabitUUID(uuid)

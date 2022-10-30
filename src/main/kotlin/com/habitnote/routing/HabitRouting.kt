@@ -2,6 +2,7 @@ package com.habitnote.routing
 
 import com.habitnote.InMemoryCache
 import com.habitnote.models.Habit
+import com.habitnote.models.HabitUUID
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -24,6 +25,14 @@ fun Application.configureHabitRouting() {
             val habitUUID = InMemoryCache.addHabit(habit)
 
             call.respond(habitUUID)
+        }
+
+        delete("/habit") {
+            val habitUUID = call.receive(HabitUUID::class)
+
+            InMemoryCache.deleteHabit(habitUUID)
+
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

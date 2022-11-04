@@ -2,7 +2,6 @@ package com.habitnote.models
 
 import com.habitnote.serializers.HabitUUIDSerializer
 import kotlinx.serialization.Serializable
-import java.util.*
 
 @Serializable
 data class Habit(
@@ -14,7 +13,7 @@ data class Habit(
     val count: Int,
     val color: Int,
     val date: Long,
-    val done_dates: List<Long> = listOf(),
+    val done_dates: List<Long>,
     @Serializable(with = HabitUUIDSerializer::class)
-    val uid: HabitUUID = HabitUUID(UUID.randomUUID()),
+    val uid: HabitUUID,
 )

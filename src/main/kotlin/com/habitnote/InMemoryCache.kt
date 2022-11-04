@@ -6,17 +6,17 @@ import com.habitnote.models.HabitUUID
 import java.util.*
 
 object InMemoryCache {
-    private val habits = mutableMapOf<String, Habit>()
+    private val habits = mutableMapOf<HabitUUID, Habit>()
 
     fun getHabits(): List<Habit> = habits.values.toList()
 
     fun addHabit(habit: Habit): HabitUUID {
         val habitUUID = getHabitUUID()
         val habitWithUUID = habit.copy(
-            uid = habitUUID.uid
+            uid = habitUUID
         )
 
-        habits[habitUUID.uid] = habitWithUUID
+        habits[habitUUID] = habitWithUUID
 
         return habitUUID
     }
@@ -40,11 +40,11 @@ object InMemoryCache {
     }
 
     fun deleteHabit(habitUUID: HabitUUID) {
-        habits.remove(habitUUID.uid)
+        habits.remove(habitUUID)
     }
 
     private fun getHabitUUID(): HabitUUID {
-        val uuid = UUID.randomUUID().toString()
+        val uuid = UUID.randomUUID()
         return HabitUUID(uuid)
     }
 

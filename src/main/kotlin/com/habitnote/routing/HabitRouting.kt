@@ -1,6 +1,7 @@
 package com.habitnote.routing
 
 import com.habitnote.InMemoryCache
+import com.habitnote.database.dao.DAOFacadeImpl
 import com.habitnote.models.Habit
 import com.habitnote.models.HabitDone
 import com.habitnote.models.HabitUUID
@@ -11,9 +12,11 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureHabitRouting() {
+    val habitDao = DAOFacadeImpl.getHabitDao()
+
     routing {
         get("/habit") {
-            call.respond(InMemoryCache.getHabits())
+            call.respond(habitDao.allHabits())
         }
 
         put("/habit") {

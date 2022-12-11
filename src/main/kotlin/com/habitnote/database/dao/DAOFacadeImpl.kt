@@ -4,15 +4,20 @@ import com.habitnote.database.dao.DatabaseFactory.dbQuery
 import com.habitnote.database.tables.HabitTable
 import com.habitnote.models.Habit
 import com.habitnote.models.HabitUUID
-import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.util.*
 
 class DAOFacadeImpl : DAOFacade {
     override suspend fun allHabits(): List<Habit> = dbQuery {
         HabitTable.selectAll().map(::resultRowToHabit)
+    }
+
+    override suspend fun getHabit(uid: HabitUUID): Habit? = dbQuery {
+        HabitTable
+            .select { HabitTable.uid eq uid.uid.toString() }
+            .map(::resultRowToHabit)
+            .singleOrNull()
     }
 
     override suspend fun addHabit(
@@ -25,7 +30,6 @@ class DAOFacadeImpl : DAOFacade {
         color: Int,
         date: Long,
         done_dates: List<Long>,
-        uid: HabitUUID,
     ): Habit? = dbQuery {
         val insertStatement = HabitTable.insert {
             it[HabitTable.title] = title
@@ -37,9 +41,38 @@ class DAOFacadeImpl : DAOFacade {
             it[HabitTable.color] = color
             it[HabitTable.date] = date
             it[HabitTable.done_dates] = toDoneDates(done_dates)
-            it[HabitTable.uid] = uid.uid.toString()
+            it[HabitTable.uid] = UUID.randomUUID().toString()
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToHabit)
+    }
+
+    override suspend fun updateHabit(
+        title: String,
+        description: String,
+        priority: Int,
+        type: Int,
+        frequency: Int,
+        count: Int,
+        color: Int,
+        date: Long,
+        done_dates: List<Long>,
+        uid: HabitUUID
+    ): Boolean = dbQuery {
+        HabitTable.update({ HabitTable.uid eq uid.uid.toString() }) {
+            it[HabitTable.title] = title
+            it[HabitTable.description] = description
+            it[HabitTable.priority] = priority
+            it[HabitTable.type] = type
+            it[HabitTable.frequency] = frequency
+            it[HabitTable.count] = count
+            it[HabitTable.color] = color
+            it[HabitTable.date] = date
+            it[HabitTable.done_dates] = toDoneDates(done_dates)
+        } > 0
+    }
+
+    override suspend fun deleteHabit(uid: HabitUUID): Boolean = dbQuery {
+        HabitTable.deleteWhere { HabitTable.uid eq uid.uid.toString() } > 0
     }
 
     private fun resultRowToHabit(row: ResultRow) = Habit(
@@ -69,24 +102,7 @@ class DAOFacadeImpl : DAOFacade {
 
     companion object {
         fun getHabitDao(): DAOFacade {
-            return DAOFacadeImpl().apply {
-                runBlocking {
-                    if (allHabits().isEmpty()) {
-                        addHabit(
-                            title = "HabitTitle",
-                            description = "HabitDescription",
-                            priority = 0,
-                            type = 0,
-                            frequency = 1,
-                            count = 1,
-                            color = -22272,
-                            date = 1667075334008,
-                            done_dates = listOf(),
-                            uid = HabitUUID(UUID.randomUUID()),
-                        )
-                    }
-                }
-            }
+            return DAOFacadeImpl()
         }
     }
 }

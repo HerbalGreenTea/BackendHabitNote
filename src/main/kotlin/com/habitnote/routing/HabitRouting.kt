@@ -1,6 +1,6 @@
 package com.habitnote.routing
 
-import com.habitnote.database.dao.DAOFacadeImpl
+import com.habitnote.database.dao.HabitDaoImpl
 import com.habitnote.models.Habit
 import com.habitnote.models.HabitDone
 import com.habitnote.models.HabitUUID
@@ -11,7 +11,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureHabitRouting() {
-    val habitDao = DAOFacadeImpl.getHabitDao()
+    val habitDao = HabitDaoImpl.getHabitDao()
 
     routing {
         get("/habit") {
@@ -21,17 +21,7 @@ fun Application.configureHabitRouting() {
         put("/habit") {
             val habit = call.receive(Habit::class)
 
-            val addedHabit = habitDao.addHabit(
-                title = habit.title,
-                description = habit.description,
-                priority = habit.priority,
-                type = habit.type,
-                frequency = habit.frequency,
-                count = habit.count,
-                color = habit.color,
-                date = habit.date,
-                done_dates = habit.done_dates,
-            )
+            val addedHabit = habitDao.addHabit(habit)
 
             if (addedHabit != null) {
                 call.respond(addedHabit.uid)
@@ -49,21 +39,10 @@ fun Application.configureHabitRouting() {
                     add(habitDone.date)
                 }
 
-                val updatedHabit = habit.copy(
-                    done_dates = habitDoneDate
-                )
-
                 habitDao.updateHabit(
-                    title = updatedHabit.title,
-                    description = updatedHabit.description,
-                    priority = updatedHabit.priority,
-                    type = updatedHabit.type,
-                    frequency = updatedHabit.frequency,
-                    count = updatedHabit.count,
-                    color = updatedHabit.color,
-                    date = updatedHabit.date,
-                    done_dates = updatedHabit.done_dates,
-                    uid = habitDone.habit_uid,
+                    habit.copy(
+                        done_dates = habitDoneDate
+                    )
                 )
             }
 
